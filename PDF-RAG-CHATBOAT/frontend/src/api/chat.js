@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
 const CHAT_ENDPOINT = import.meta.env.VITE_CHAT_ENDPOINT || "/chat";
 
 function buildUrl(path) {
@@ -25,13 +25,21 @@ function normalizeChatResponse(data) {
 }
 
 export async function sendChatMessage(question) {
-  const response = await fetch(buildUrl(CHAT_ENDPOINT), {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({ question, query: question, message: question })
-  });
+  let response;
+
+  try {
+    response = await fetch(buildUrl(CHAT_ENDPOINT), {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ question, query: question, message: question })
+    });
+  } catch (error) {
+    throw new Error(
+      "Backend API is not reachable. Start FastAPI on port 8000, then try again."
+    );
+  }
 
   let payload;
   const contentType = response.headers.get("content-type") || "";
