@@ -1,4 +1,7 @@
+from pathlib import Path
+
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field, model_validator
 
@@ -9,6 +12,7 @@ except ImportError:
 
 
 app = FastAPI(title="PDF RAG Chatboat API")
+PDF_PATH = Path(__file__).parent / "Learning-Node.pdf"
 
 app.add_middleware(
     CORSMiddleware,
@@ -49,6 +53,18 @@ class ChatResponse(BaseModel):
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+@app.get("/pdf")
+def get_pdf():
+    if not PDF_PATH.exists():
+        raise HTTPException(status_code=404, detail="PDF file was not found.")
+
+    return FileResponse(
+        PDF_PATH,
+        media_type="application/pdf",
+        headers={"Content-Disposition": 'inline; filename="Learning-Node.pdf"'},
+    )
 
 
 @app.post("/chat", response_model=ChatResponse)

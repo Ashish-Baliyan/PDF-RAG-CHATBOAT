@@ -8,12 +8,28 @@ const exampleQuestions = [
   "Which page should I read for modules?"
 ];
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "/api";
+
 function createMessageId() {
   if (globalThis.crypto?.randomUUID) {
     return globalThis.crypto.randomUUID();
   }
 
   return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
+function buildApiUrl(path) {
+  const base = API_BASE_URL.replace(/\/+$/, "");
+  const endpoint = path.startsWith("/") ? path : `/${path}`;
+
+  return `${base}${endpoint}`;
+}
+
+function openPdfPage(page) {
+  const pageNumber = Number.parseInt(page, 10);
+  const pageHash = Number.isNaN(pageNumber) ? "" : `#page=${pageNumber}`;
+
+  window.open(buildApiUrl(`/pdf${pageHash}`), "_blank", "noopener,noreferrer");
 }
 
 function SourceList({ sources }) {
@@ -31,7 +47,18 @@ function SourceList({ sources }) {
           <div className="source" key={`${page || "source"}-${index}`}>
             <FileText size={16} aria-hidden="true" />
             <div>
-              <strong>{page ? `Page ${page}` : `Source ${index + 1}`}</strong>
+              {page ? (
+                <button
+                  type="button"
+                  className="source-page-button"
+                  onClick={() => openPdfPage(page)}
+                  title={`Open PDF at page ${page}`}
+                >
+                  Page {page}
+                </button>
+              ) : (
+                <strong>Source {index + 1}</strong>
+              )}
               {content ? <p>{content}</p> : null}
             </div>
           </div>
@@ -144,7 +171,7 @@ export default function App() {
             <span className="status-dot" aria-hidden="true" />
             <div>
               <strong>Backend API</strong>
-              <p>{import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"}</p>
+              <p>{API_BASE_URL}</p>
             </div>
           </div>
 

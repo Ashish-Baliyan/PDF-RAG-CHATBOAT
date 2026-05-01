@@ -13,8 +13,16 @@ npm run dev
 The app reads these variables:
 
 ```bash
-VITE_API_BASE_URL=http://localhost:8000
+VITE_API_BASE_URL=/api
 VITE_CHAT_ENDPOINT=/chat
+```
+
+During `npm run dev`, Vite proxies `/api` to the FastAPI backend at `http://localhost:8000`.
+Start the backend before sending a chat message:
+
+```bash
+cd ../backend
+uvicorn app:app --reload --host 0.0.0.0 --port 8000
 ```
 
 The chat client sends a `POST` request with this JSON payload:
